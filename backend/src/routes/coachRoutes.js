@@ -1,23 +1,32 @@
 const express = require("express");
 const router = express.Router();
-const { getCoaches, getCoachById, updateCoach, deleteCoach } = require("../controllers/coachController");
+const {
+  createCoach,
+  getCoach,
+  getAllCoaches,
+  updateCoach,
+  deleteCoach,
+} = require("../controllers/coachController");
+const { verifyToken, authorizeRoles } = require("../middleware/authMiddleware");
 
-// Only Admins and Managers can view all coaches
-router.get("/", verifyToken, authorizeRoles("admin", "manager"), getCoaches);
+// ✅ Get All Coaches (Only Admins & Managers)
+router.get("/", verifyToken, authorizeRoles("admin", "manager"), getAllCoaches);
 
-// Coaches can view their own profile, but others require admin access
-router.get("/:id", verifyToken, (req, res, next) => {
-    if (req.user.role === "coach" && req.user.uid !== req.params.id) {
-        return res.status(403).json({ message: "Access Denied" });
-    }
-    next();
-}, getCoachById);
+// ✅ Create a Coach (Only Admins & Managers)
+router.post("/", verifyToken, authorizeRoles("admin", "manager"), createCoach);
 
-// Only Admins and Managers can update coach data
-router.put("/:id", verifyToken, authorizeRoles("admin", "manager"), updateCoach);
+// ✅ Get Coach by UID (Only Self-View for Coaches, Others Need Permission)
+router.get("/:uid", verifyToken, (req, res, next) => {
+  if (req.user.role === "coach" && req.user.uid !== req.params.uid) {
+    return res.status(403).json({ message: "Access Denied: Cannot view other coaches' profiles." });
+  }
+  next();
+}, getCoach);
 
-// Only Admins can delete a coach
-router.delete("/:id", verifyToken, authorizeRoles("admin"), deleteCoach);
+// ✅ Update Coach (Only Admins & Managers)
+router.put("/:uid", verifyToken, authorizeRoles("admin", "manager"), updateCoach);
 
-module.exports = router;
+// ✅ Delete Coach (Only Admins)
+router.delete("/:uid", verifyToken, authorizeRoles("admin"), deleteCoach);
+
 module.exports = router;

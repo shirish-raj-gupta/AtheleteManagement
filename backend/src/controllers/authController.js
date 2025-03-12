@@ -10,42 +10,48 @@ const generateToken = (uid, email) => {
 // **Register User**
 const register = async (req, res) => {
     try {
-        const { email, password, name, role, phone } = req.body;
+      const { email, password, name, role, phone } = req.body;
   
-        if (!email || !password || !name || !role || !phone) {
-            return res.status(400).json({ message: "All fields are required." });
-        }
+      if (!email || !password || !name || !role || !phone) {
+        return res.status(400).json({ message: "All fields are required." });
+      }
   
-        // Hash Password 🔒
-        const hashedPassword = await bcrypt.hash(password, 10);
+      // 🔥 Ensure valid role
+      const validRoles = ["athlete", "coach", "scheduler", "manager", "planner" , "admin"];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({ message: "Invalid role" });
+      }
   
-        // Create User in Firebase Authentication
-        const user = await auth.createUser({
-            email,
-            password,
-            displayName: name
-        });
+      // Hash Password 🔒
+      const hashedPassword = await bcrypt.hash(password, 10);
   
-        // Determine Firestore Collection Based on Role
-        const collectionName = `${role}s`; // Example: "athletes", "managers"
+      // ✅ Create User in Firebase Authentication
+      const user = await auth.createUser({
+        email,
+        password,
+        displayName: name
+      });
   
-        // Save User in Firestore
-        await db.collection(collectionName).doc(user.uid).set({
-            uid: user.uid,
-            name,
-            email,
-            role,
-            phone,
-            password: hashedPassword,  // ✅ Now storing hashed password
-            createdAt: new Date()
-        });
+      // ✅ Determine Firestore Collection Based on Role
+      const collectionName = `${role}s`;  // Dynamically assigns collection like "athletes", "coaches"
   
-        // Generate Token
-        const token = generateToken(user.uid, email);
+      // ✅ Save User in Firestore
+      await db.collection(collectionName).doc(user.uid).set({
+        uid: user.uid,
+        name,
+        email,
+        role,
+        phone,
+        password: hashedPassword,
+        createdAt: new Date()
+      });
   
-        res.status(201).json({ message: "User registered successfully", token, userId: user.uid });
+      // ✅ Generate Token
+      const token = generateToken(user.uid, email);
+  
+      res.status(201).json({ message: "User registered successfully", token, userId: user.uid });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+      res.status(500).json({ message: error.message });
     }
   };
   
@@ -56,7 +62,7 @@ const login = async (req, res) => {
         const { email, password } = req.body;
   
         // List of role-based collections
-        const collections = ["athletes", "coaches", "schedulers", "managers", "planners"];
+        const collections = ["athletes", "coachs", "schedulers", "managers", "planners" , "admins"];
         
         let userData = null;
         let userId = null;

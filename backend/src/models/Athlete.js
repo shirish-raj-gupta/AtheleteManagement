@@ -1,4 +1,4 @@
-const BaseUser = require("./BaseUser");
+const BaseUser = require("./userModel");
 
 class Athlete extends BaseUser {
   constructor(uid, name, email, phone, age, sport, team, stats = {}, injuries = []) {
@@ -17,3 +17,4 @@ class Athlete extends BaseUser {
 }
 
 module.exports = Athlete;
+ 

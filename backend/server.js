@@ -5,6 +5,11 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const authRoutes = require("./src/routes/authRoutes");
 const athleteRoutes = require("./src/routes/athleteRoutes");
+const coachRoutes = require("./src/routes/coachRoutes");
+const plannerRoutes = require("./src/routes/plannerRoutes");
+const schedulerRoutes = require("./src/routes/schedulerRoutes");
+const managerRoutes = require("./src/routes/managerRoutes");
+const eventRoutes = require("./src/routes/eventRoutes");
 
 const app = express();
 app.use(express.json());
@@ -15,7 +20,11 @@ app.use(morgan("dev"));
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/athletes", athleteRoutes);
-
+app.use("/api/coaches", coachRoutes); // ✅ Added Coach Routes
+app.use("/api/managers", managerRoutes); 
+app.use("/api/planners", plannerRoutes);
+app.use("/api/schedulers", schedulerRoutes);
+app.use("/api/events", eventRoutes);
 
 app.get("/", (req, res) => res.send("Athlete Management API Running"));
 
