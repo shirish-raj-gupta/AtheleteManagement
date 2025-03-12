@@ -10,6 +10,7 @@ const plannerRoutes = require("./src/routes/plannerRoutes");
 const schedulerRoutes = require("./src/routes/schedulerRoutes");
 const managerRoutes = require("./src/routes/managerRoutes");
 const eventRoutes = require("./src/routes/eventRoutes");
+const aiRoutes = require("./src/routes/aiRoutes");
 
 const app = express();
 app.use(express.json());
@@ -25,6 +26,7 @@ app.use("/api/managers", managerRoutes);
 app.use("/api/planners", plannerRoutes);
 app.use("/api/schedulers", schedulerRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/ai", aiRoutes);
 
 app.get("/", (req, res) => res.send("Athlete Management API Running"));
 

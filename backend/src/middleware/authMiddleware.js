@@ -20,7 +20,7 @@ const verifyToken = async (req, res, next) => {
     req.user = decoded;
 
     // 🔍 Check User Role in Firestore
-    const collections = ["athletes", "coachs", "schedulers", "managers", "planners"];
+    const collections = ["athletes", "coachs", "schedulers", "managers", "planners" , "admins"];
     let userRole = null;
 
     for (const collection of collections) {

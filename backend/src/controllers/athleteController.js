@@ -1,18 +1,37 @@
-const { db } = require("../config/firestore");
-const Athlete = require("../models/Athlete");
+const bcrypt = require("bcryptjs");
+const {auth , db} = require("../config/firestore"); // Ensure this points to your Firestore config
+
 
 // ✅ Create Athlete
 const createAthlete = async (req, res) => {
   try {
-    const { uid, name, email, phone, age, sport, team, stats, injuries } = req.body;
+    const { uid, name, email, phone, age, password, sport, team, stats, injuries } = req.body;
 
-    if (!uid || !name || !email || !phone || !age || !sport || !team) {
+    // ✅ Check for missing fields
+    if (!uid || !name || !email || !phone || !age || !password || !sport || !team) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
-    const athlete = new Athlete(uid, name, email, phone, age, sport, team, stats, injuries);
+    // ✅ Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    await db.collection("athletes").doc(uid).set({ ...athlete });
+    // ✅ Define athlete object
+    const athlete = {
+      uid,
+      name,
+      email,
+      phone,
+      age,
+      password: hashedPassword, // Store hashed password
+      sport,
+      team,
+      stats: stats || { speed: 0, stamina: 0, strength: 0, agility: 0, reaction_time: 0 }, // Default values
+      injuries: injuries || [], // Ensure it's an array
+      createdAt: new Date().toISOString(),
+    };
+
+    // ✅ Save to Firestore
+    await db.collection("athletes").doc(uid).set(athlete);
 
     res.status(201).json({ message: "Athlete created successfully", athlete });
   } catch (error) {

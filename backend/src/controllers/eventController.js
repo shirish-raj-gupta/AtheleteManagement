@@ -139,11 +139,147 @@ const deleteEvent = async (req, res) => {
   }
 };
 
+const markAttendance = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { userId, status } = req.body; // Status: "present" or "absent"
+
+    if (!userId || !status) {
+      return res.status(400).json({ message: "User ID and status are required." });
+    }
+
+    // Get event from Firestore
+    const eventRef = db.collection("events").doc(eventId);
+    const eventDoc = await eventRef.get();
+
+    if (!eventDoc.exists) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    let eventData = eventDoc.data();
+
+    // Check if user is registered
+    if (!eventData.attendees.includes(userId)) {
+      return res.status(400).json({ message: "User is not registered for this event." });
+    }
+
+    // Add attendance record
+    if (!eventData.attendance) {
+      eventData.attendance = {};
+    }
+    eventData.attendance[userId] = status;
+
+    // Update Firestore
+    await eventRef.update({ attendance: eventData.attendance });
+
+    res.json({ message: `Attendance marked as ${status} for user ${userId}`, attendance: eventData.attendance });
+  } catch (error) {
+    res.status(500).json({ message: "Error marking attendance", error: error.message });
+  }
+};
+
+const getEventAttendance = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+
+    const eventDoc = await db.collection("events").doc(eventId).get();
+    if (!eventDoc.exists) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    const eventData = eventDoc.data();
+
+    if (!eventData.attendance) {
+      return res.json({ message: "No attendance records found for this event.", attendance: {} });
+    }
+
+    res.json({ eventId, attendance: eventData.attendance });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching event attendance", error: error.message });
+  }
+};
+
+const getAthleteAttendance = async (req, res) => {
+  try {
+    const { athleteId } = req.params;
+
+    const snapshot = await db.collection("events").get();
+
+    if (snapshot.empty) {
+      return res.status(404).json({ message: "No events found." });
+    }
+
+    const attendanceRecords = {};
+    snapshot.forEach((doc) => {
+      const eventData = doc.data();
+      if (eventData.attendance && eventData.attendance[athleteId]) {
+        attendanceRecords[doc.id] = {
+          title: eventData.title,
+          date: eventData.date,
+          status: eventData.attendance[athleteId],
+        };
+      }
+    });
+
+    if (Object.keys(attendanceRecords).length === 0) {
+      return res.json({ message: "No attendance records found for this athlete." });
+    }
+
+    res.json({ athleteId, attendance: attendanceRecords });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching athlete attendance", error: error.message });
+  }
+};
+
+
+const getEventAttendanceSummary = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+
+    const eventRef = db.collection("events").doc(eventId);
+    const eventDoc = await eventRef.get();
+
+    if (!eventDoc.exists) {
+      return res.status(404).json({ message: "Event not found." });
+    }
+
+    const eventData = eventDoc.data();
+    const attendance = eventData.attendance || {};
+
+    // Calculate summary
+    const totalAttendees = Object.keys(attendance).length;
+    const presentCount = Object.values(attendance).filter((a) => a.status === "present").length;
+    const absentCount = Object.values(attendance).filter((a) => a.status === "absent").length;
+
+    const summary = {
+      eventId,
+      title: eventData.title || "Untitled Event",
+      date: eventData.date || "Unknown Date",
+      location: eventData.location || "Unknown Location",
+      totalAttendees,
+      present: presentCount,
+      absent: absentCount,
+      attendees: attendance
+    };
+
+    res.json({ attendanceSummary: summary });
+  } catch (error) {
+    console.error("❌ Error generating attendance summary:", error);
+    res.status(500).json({ message: "Error generating attendance summary", error: error.message });
+  }
+};
+
+
+
 module.exports = {
   createEvent,
   getAllEvents,
   getEvent,
   updateEvent,
   deleteEvent,
-  registerForEvent
+  registerForEvent,
+  markAttendance,
+  getEventAttendance,
+  getAthleteAttendance,
+  getEventAttendanceSummary
 };
