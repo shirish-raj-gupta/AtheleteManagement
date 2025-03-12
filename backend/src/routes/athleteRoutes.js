@@ -1,25 +1,33 @@
 const express = require("express");
 const router = express.Router();
-const { createAthlete, getAthlete, updateAthlete, deleteAthlete } = require("../controllers/athleteController");
+const {
+  createAthlete,
+  getAthlete,
+  getAllAthletes,
+  updateAthlete,
+  deleteAthlete,
+} = require("../controllers/athleteController");
 const { verifyToken, authorizeRoles } = require("../middleware/authMiddleware");
 
-// Only Admins, Managers, and Planners can get all athletes
-router.get("/", verifyToken, authorizeRoles("admin", "manager", "planner"), getAthlete);
+// ✅ Get All Athletes (Only Admins, Managers, and Planners)
+router.get("/", verifyToken, authorizeRoles("admin", "manager", "planner"), getAllAthletes);
 
-router.post("/athletes", createAthlete); // Create athlete
+// ✅ Create an Athlete (Anyone can create)
+router.post("/", verifyToken, authorizeRoles("admin", "manager"), createAthlete);
 
-// Athletes can view only their own data
-router.get("/:id", verifyToken, (req, res, next) => {
-  if (req.user.role === "athlete" && req.user.uid !== req.params.id) {
-      return res.status(403).json({ message: "Access Denied" });
+
+// ✅ Get Athlete (Athletes can only view their own profile)
+router.get("/:uid", verifyToken, (req, res, next) => {
+  if (req.user.role === "athlete" && req.user.uid !== req.params.uid) {
+    return res.status(403).json({ message: "Access Denied: Cannot view other profiles." });
   }
   next();
 }, getAthlete);
 
-// Only Admins and Managers can update athlete data
-router.put("/:id", verifyToken, authorizeRoles("admin", "manager"), updateAthlete);
+// ✅ Update Athlete (Only Admins & Managers)
+router.put("/:uid", verifyToken, authorizeRoles("admin", "manager"), updateAthlete);
 
-// Only Admins can delete an athlete
-router.delete("/:id", verifyToken, authorizeRoles("admin"), deleteAthlete);
+// ✅ Delete Athlete (Only Admins)
+router.delete("/:uid", verifyToken, authorizeRoles("admin"), deleteAthlete);
 
 module.exports = router;

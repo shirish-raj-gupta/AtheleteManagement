@@ -12,7 +12,6 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
 
-
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/athletes", athleteRoutes);
