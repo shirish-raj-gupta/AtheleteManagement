@@ -11,6 +11,10 @@ const schedulerRoutes = require("./src/routes/schedulerRoutes");
 const managerRoutes = require("./src/routes/managerRoutes");
 const eventRoutes = require("./src/routes/eventRoutes");
 const aiRoutes = require("./src/routes/aiRoutes");
+const aiTrainingRoutes = require("./src/routes/aiTrainingRoutes");
+const aiChatbotRoutes = require("./src/routes/aiChatbotRoutes");
+const aiSchedulerRoutes = require("./src/routes/aiSchedulerRoutes");
+const realTimeRoutes = require("./src/routes/realTimeRoutes");
 
 const app = express();
 app.use(express.json());
@@ -27,6 +31,10 @@ app.use("/api/planners", plannerRoutes);
 app.use("/api/schedulers", schedulerRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/ai", aiTrainingRoutes);
+app.use("/api/ai", aiChatbotRoutes);
+app.use("/api/ai/scheduler", aiSchedulerRoutes);
+app.use("/api/realtime", realTimeRoutes);
 
 app.get("/", (req, res) => res.send("Athlete Management API Running"));
 
