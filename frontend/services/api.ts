@@ -21,7 +21,41 @@ export const deleteAthlete = async (athleteId: string) => {
   return await axiosInstance.delete(`/athletes/${athleteId}`);
 };
 
-// ✅ Fetch Athlete Performance
+// ✅ Fetch Athlete Performance API
 export const fetchAthletePerformance = async (athleteId: string) => {
-  return await axiosInstance.get(`/athletes/${athleteId}`);
+  const response = await axiosInstance.get(`/athletes/${athleteId}/performance`);
+  return response.data;
 };
+
+// ✅ Send Performance Data to AI Model
+export const analyzePerformance = async (athleteId: string) => {
+  const response = await axiosInstance.post(`/athletes/${athleteId}/analyze`);
+  return response.data;
+};
+
+
+// ✅ Predict Injury API
+export const predictInjury = async (athleteId: string) => {
+  const response = await axiosInstance.get(`/athletes/${athleteId}/injury`);
+  return response.data;
+};
+
+
+// ✅ Fetch Athlete Profile
+export const fetchAthleteProfile = async (athleteId: string) => {
+  const response = await axiosInstance.get(`/athletes/${athleteId}`);
+  return response.data;
+};
+
+// ✅ Update Athlete Profile
+export const updateAthlete = async (athleteId: string, updatedData: any) => {
+  return await axiosInstance.put(`/athletes/${athleteId}`, updatedData);
+};
+
+
+// ✅ Fetch Athlete Stats API
+export const fetchAthleteStats = async (athleteId: string) => {
+  const response = await axiosInstance.get(`/athletes/${athleteId}/stats`);
+  return response.data;
+};
+

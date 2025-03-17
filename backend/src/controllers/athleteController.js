@@ -39,21 +39,24 @@ const createAthlete = async (req, res) => {
   }
 };
 
-// ✅ Read (Fetch) Athlete by UID
+// ✅ Fetch Athlete Profile by UID
 const getAthlete = async (req, res) => {
   try {
     const { uid } = req.params;
-    const doc = await db.collection("athletes").doc(uid).get();
+
+    const athleteRef = db.collection('athletes').doc(uid);
+    const doc = await athleteRef.get();
 
     if (!doc.exists) {
-      return res.status(404).json({ message: "Athlete not found" });
+      return res.status(404).json({ message: 'Athlete not found' });
     }
 
     res.status(200).json(doc.data());
   } catch (error) {
-    res.status(500).json({ message: "Error fetching athlete", error: error.message });
+    res.status(500).json({ message: 'Error fetching athlete profile' });
   }
 };
+
 
 // ✅ Update Athlete
 const updateAthlete = async (req, res) => {
@@ -82,8 +85,6 @@ const deleteAthlete = async (req, res) => {
   }
 };
 
-module.exports = { createAthlete, getAthlete, updateAthlete, deleteAthlete };
-
 
 // ✅ Get All Athletes (Restricted to Admins, Managers, Planners)
 const getAllAthletes = async (req, res) => {
@@ -106,10 +107,112 @@ const getAllAthletes = async (req, res) => {
   }
 };
 
+// ✅ Fetch Athlete Performance Data
+const getAthletePerformance = async (req, res) => {
+  try {
+    const { uid } = req.params;
+
+    const athleteRef = db.collection('athletes').doc(uid);
+    const doc = await athleteRef.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({ message: 'Athlete not found' });
+    }
+
+    const athleteData = doc.data();
+    const performanceData = athleteData.stats || {};
+
+    res.status(200).json({ stats: performanceData });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching performance data' });
+  }
+};
+
+// ✅ Analyze Athlete Performance Using Gemini API
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const analyzeAthletePerformance = async (req, res) => {
+  const { uid } = req.params;
+
+  const athleteRef = db.collection('athletes').doc(uid);
+  const doc = await athleteRef.get();
+
+  if (!doc.exists) {
+    return res.status(404).json({ message: 'Athlete not found' });
+  }
+
+  const performanceData = doc.data().performance || {};
+
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+  const prompt = `Analyze the following athlete performance data and suggest improvements:\n\n${JSON.stringify(performanceData)}`;
+
+  const result = await model.generateContent(prompt);
+
+  const response = await result.response;
+
+  res.status(200).json({ analysis: response.text() });
+};
+
+
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// ✅ Predict Injury Risk Using Gemini API
+const predictInjury = async (req, res) => {
+  const { uid } = req.params;
+
+  const athleteRef = db.collection('athletes').doc(uid);
+  const doc = await athleteRef.get();
+
+  if (!doc.exists) {
+    return res.status(404).json({ message: 'Athlete not found' });
+  }
+
+  const performanceData = doc.data().performance || {};
+
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+  const prompt = `Based on the following athlete performance data, predict the risk of injury and suggest preventive measures:\n\n${JSON.stringify(performanceData)}`;
+
+  const result = await model.generateContent(prompt);
+
+  const response = await result.response;
+
+  res.status(200).json({ injuryRisk: response.text() });
+};
+
+
+// ✅ Fetch Athlete Stats
+const getAthleteStats = async (req, res) => {
+  const { uid } = req.params;
+
+  const athleteRef = db.collection('athletes').doc(uid);
+  const doc = await athleteRef.get();
+
+  if (!doc.exists) {
+    return res.status(404).json({ message: 'Athlete not found' });
+  }
+
+  const athleteData = doc.data();
+
+  // ✅ Return only the `stats` field from Firestore
+  res.status(200).json(athleteData.stats || {});
+};
+
+
+
 module.exports = {
   createAthlete,
   getAthlete,
   getAllAthletes,
   updateAthlete,
   deleteAthlete,
+  getAthletePerformance,
+  analyzeAthletePerformance,
+  predictInjury,
+  getAthleteStats
 };

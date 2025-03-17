@@ -25,7 +25,7 @@ export default function PerformancePage() {
     try {
       const res = await analyzePerformance(athleteId);
       setAnalysis(res.analysis);
-      toast.success('AI Performance Analysis Done');
+      toast.success('AI Performance Analysis Done ✅');
     } catch (error) {
       toast.error('Error analyzing performance');
     }
@@ -35,7 +35,7 @@ export default function PerformancePage() {
     try {
       const res = await predictInjury(athleteId);
       setInjuryRisk(res.injuryRisk);
-      toast.success('Injury Prediction Done');
+      toast.success('Injury Prediction Done ✅');
     } catch (error) {
       toast.error('Error predicting injury');
     }
@@ -47,24 +47,24 @@ export default function PerformancePage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Athlete Performance Analysis</h1>
+      <h1 className="text-3xl font-bold mb-6">Athlete Performance Analysis 🏅</h1>
 
       {performance ? (
-        <div className="mb-6 p-4 bg-gray-100 rounded-md">
-          <h2 className="text-xl font-semibold mb-2">Current Performance Data:</h2>
+        <div className="bg-gray-100 p-6 rounded-md">
+          <h2 className="text-xl font-semibold mb-2">Performance Data:</h2>
           <pre>{JSON.stringify(performance, null, 2)}</pre>
         </div>
       ) : (
         <p>Loading performance data...</p>
       )}
 
-      <div className="flex space-x-4">
+      <div className="flex space-x-4 mt-6">
         <button onClick={handleAnalyzePerformance} className="bg-blue-600 text-white px-4 py-2 rounded-md">
-          Analyze Performance (AI)
+          Analyze Performance (AI) ✅
         </button>
 
         <button onClick={handlePredictInjury} className="bg-red-600 text-white px-4 py-2 rounded-md">
-          Predict Injury (AI)
+          Predict Injury (AI) ✅
         </button>
       </div>
 

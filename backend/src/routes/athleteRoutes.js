@@ -6,6 +6,10 @@ const {
   getAllAthletes,
   updateAthlete,
   deleteAthlete,
+  getAthletePerformance,
+  analyzeAthletePerformance,
+  predictInjury,
+  getAthleteStats
 } = require("../controllers/athleteController");
 const { verifyToken, authorizeRoles } = require("../middleware/authMiddleware");
 
@@ -16,18 +20,29 @@ router.get("/", verifyToken, authorizeRoles("admin", "manager", "planner"), getA
 router.post("/", verifyToken, authorizeRoles("admin", "manager"), createAthlete);
 
 
-// ✅ Get Athlete (Athletes can only view their own profile)
-router.get("/:uid", verifyToken, (req, res, next) => {
-  if (req.user.role === "athlete" && req.user.uid !== req.params.uid) {
-    return res.status(403).json({ message: "Access Denied: Cannot view other profiles." });
-  }
-  next();
-}, getAthlete);
+// Athlete Profile Routes
+router.get('/:uid', verifyToken, getAthlete);
+
 
 // ✅ Update Athlete (Only Admins & Managers)
 router.put("/:uid", verifyToken, authorizeRoles("admin", "manager"), updateAthlete);
 
 // ✅ Delete Athlete (Only Admins)
 router.delete("/:uid", verifyToken, authorizeRoles("admin"), deleteAthlete);
+
+// ✅ Fetch Athlete Performance
+router.get('/:uid/performance', verifyToken, getAthletePerformance);
+
+// ✅ Analyze Athlete Performance (Using AI)
+router.post('/:uid/analyze', verifyToken, analyzeAthletePerformance);
+
+// ✅ Injury Prediction Route
+router.get('/:uid/injury', verifyToken, predictInjury);
+
+
+// ✅ Athlete Stats Route
+router.get('/:uid/stats', verifyToken, getAthleteStats);
+
+
 
 module.exports = router;
