@@ -1,50 +1,41 @@
 const jwt = require("jsonwebtoken");
 const { db } = require("../config/firestore");
 
-// ✅ Middleware: Verify JWT Token
+// ✅ Middleware: Verify Token
 const verifyToken = async (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "Access Denied: No Token Provided" });
+  }
+
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-
-    if (!token) {
-      return res.status(401).json({ message: "Access Denied: No Token Provided" });
-    }
-
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (error) {
-      return res.status(401).json({ message: "Invalid Token", error: error.message });
-    }
-
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
 
-    // 🔍 Check User Role in Firestore
-    const collections = ["athletes", "coachs", "schedulers", "managers", "planners" , "admins"];
-    let userRole = null;
+    // ✅ Fetch User Role from Firestore
+    const collections = ["athletes", "coachs", "schedulers", "managers", "planners", "admins"];
 
     for (const collection of collections) {
-      const doc = await db.collection(collection).doc(decoded.uid).get();
-      if (doc.exists) {
-        userRole = doc.data().role;
-        req.user.role = userRole;
-        break; // ✅ Exit once role is found
+      const userDoc = await db.collection(collection).doc(decoded.uid).get();
+
+      if (userDoc.exists) {
+        req.user.role = userDoc.data().role;
+        break;
       }
     }
 
-    if (!userRole) {
-      return res.status(403).json({ message: "Access Denied: User not found in any collection" });
+    if (!req.user.role) {
+      return res.status(403).json({ message: "Access Denied: User not found in any role collection" });
     }
 
-    next();
+    next(); // Proceed to the next middleware
   } catch (error) {
     res.status(401).json({ message: "Invalid Token", error: error.message });
   }
 };
 
-  
-
-// ✅ Middleware: Role-Based Access Control
+// ✅ Role-Based Access Control
 const authorizeRoles = (...allowedRoles) => {
   return (req, res, next) => {
     if (!allowedRoles.includes(req.user.role)) {

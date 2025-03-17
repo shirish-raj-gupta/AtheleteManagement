@@ -9,7 +9,7 @@ const {
 } = require("../controllers/athleteController");
 const { verifyToken, authorizeRoles } = require("../middleware/authMiddleware");
 
-// ✅ Get All Athletes (Only Admins, Managers, and Planners)
+// ✅ Get All Athletes (Only Admin, Manager, Planner can Access)
 router.get("/", verifyToken, authorizeRoles("admin", "manager", "planner"), getAllAthletes);
 
 // ✅ Create an Athlete (Anyone can create)
