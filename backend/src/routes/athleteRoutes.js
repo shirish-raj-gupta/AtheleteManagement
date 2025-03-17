@@ -9,7 +9,8 @@ const {
   getAthletePerformance,
   analyzeAthletePerformance,
   predictInjury,
-  getAthleteStats
+  getAthleteStats,
+  registerAthlete
 } = require("../controllers/athleteController");
 const { verifyToken, authorizeRoles } = require("../middleware/authMiddleware");
 
@@ -42,6 +43,9 @@ router.get('/:uid/injury', verifyToken, predictInjury);
 
 // ✅ Athlete Stats Route
 router.get('/:uid/stats', verifyToken, getAthleteStats);
+
+// ✅ Create an Athlete (Anyone can create)
+router.post("/register",  registerAthlete);
 
 
 module.exports = router;

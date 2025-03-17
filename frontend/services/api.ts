@@ -47,7 +47,7 @@ export const fetchAthleteProfile = async (athleteId: string) => {
   return response.data;
 };
 
-// ✅ Update Athlete Profile
+// ✅ Update Athlete API
 export const updateAthlete = async (athleteId: string, updatedData: any) => {
   return await axiosInstance.put(`/athletes/${athleteId}`, updatedData);
 };
@@ -59,3 +59,7 @@ export const fetchAthleteStats = async (athleteId: string) => {
   return response.data;
 };
 
+export const registerAthlete = async (athleteData: any) => {
+  const response = await axiosInstance.post('/athletes/register', athleteData);
+  return response.data;
+};

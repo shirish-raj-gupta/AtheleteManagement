@@ -23,13 +23,19 @@ export default function AthleteProfile() {
 
   const handleUpdate = async () => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        toast.error('Unauthorized Access');
+        return;
+      }
+  
       await updateAthlete(athleteId as string, athleteData);
       toast.success('Profile Updated Successfully ✅');
-    } catch (error) {
-      toast.error('Failed to update profile');
+    } catch (error: any) {
+      console.error('Update Error:', error);
+      toast.error(error.response?.data?.message || 'Failed to update profile');
     }
   };
-
   useEffect(() => {
     fetchProfileData();
   }, [athleteId]);

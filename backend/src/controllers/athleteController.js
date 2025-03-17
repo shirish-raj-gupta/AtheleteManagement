@@ -60,17 +60,17 @@ const getAthlete = async (req, res) => {
 };
 
 
-// ✅ Update Athlete
+// Update Athlete Profile
 const updateAthlete = async (req, res) => {
+  const { athleteId } = req.params;
+  const updatedData = req.body;
+
   try {
-    const { uid } = req.params;
-    const updates = req.body;
-
-    await db.collection("athletes").doc(uid).update(updates);
-
-    res.status(200).json({ message: "Athlete updated successfully" });
+    await db.collection('athletes').doc(athleteId).update(updatedData);
+    res.status(200).json({ message: 'Athlete updated successfully ✅' });
   } catch (error) {
-    res.status(500).json({ message: "Error updating athlete", error: error.message });
+    console.error('Error updating athlete:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
@@ -212,6 +212,22 @@ const getAthleteStats = async (req, res) => {
 };
 
 
+// 🔹 POST - Register a New Athlete
+const registerAthlete = async (req, res) => {
+  try {
+    const { name, email, sport, team, age, gender } = req.body;
+    if (!name || !email || !sport || !age || !gender) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    const newAthlete = { name, email, sport, team, age, gender, createdAt: new Date() };
+    const docRef = await db.collection('athletes').add(newAthlete);
+
+    res.status(201).json({ id: docRef.id, message: 'Athlete registered successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to register athlete' });
+  }
+};
 
 
 module.exports = {
@@ -223,5 +239,6 @@ module.exports = {
   getAthletePerformance,
   analyzeAthletePerformance,
   predictInjury,
-  getAthleteStats
+  getAthleteStats,
+  registerAthlete
 };
