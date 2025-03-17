@@ -1,20 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchAthleteProfile, updateAthlete } from '@/services/api';
 import { useParams } from 'next/navigation';
+import { fetchAthleteProfile, updateAthlete } from '@/services/api';
 import { toast } from 'react-toastify';
 
 export default function AthleteProfile() {
-  const { athleteId } = useParams() as { athleteId: string };
-
+  const { athleteId } = useParams(); // ✅ Fix for dynamic route
   const [athleteData, setAthleteData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // 🔥 Fetch Athlete Profile
   const fetchProfileData = async () => {
     try {
-      const data = await fetchAthleteProfile(athleteId);
+      const data = await fetchAthleteProfile(athleteId as string); // ✅ Fetch data
       setAthleteData(data);
     } catch (error) {
       toast.error('Error fetching athlete profile');
@@ -23,20 +21,18 @@ export default function AthleteProfile() {
     }
   };
 
-  // ✅ Handle Update Profile
   const handleUpdate = async () => {
     try {
-      await updateAthlete(athleteId, athleteData);
+      await updateAthlete(athleteId as string, athleteData);
       toast.success('Profile Updated Successfully ✅');
     } catch (error) {
       toast.error('Failed to update profile');
     }
   };
 
-  // ✅ Fetch Profile on Page Load
   useEffect(() => {
     fetchProfileData();
-  }, []);
+  }, [athleteId]);
 
   return (
     <div className="p-8">

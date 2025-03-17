@@ -61,6 +61,7 @@ const login = async (req, res) => {
           userData = doc.data();
           userId = doc.id;
           userRole = userData.role;
+          
         });
         break;
       }
@@ -76,7 +77,7 @@ const login = async (req, res) => {
     }
 
     const token = generateToken(userId, email, userRole);
-    res.json({ message: "Login successful", token, userId, role: userRole });
+    res.json({ message: "Login successful", token, userId, role: userRole , athleteId: userId });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

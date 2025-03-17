@@ -13,13 +13,14 @@ export default function Login() {
   const handleLogin = async () => {
     try {
       const response = await loginUser({ email, password });
-      const { token, role } = response.data;
+      const { token, role, athleteId} = response.data;
 
       localStorage.setItem('token', token);
       localStorage.setItem('role', role);
+      localStorage.setItem('athleteId', athleteId);
 
       if (role) {
-        router.push(`/dashboard/${role}`);
+        router.push(`/dashboard/${role}s`);
       }
     } catch (error: any) {
       toast.error(error?.response?.data?.message || 'Login Failed');

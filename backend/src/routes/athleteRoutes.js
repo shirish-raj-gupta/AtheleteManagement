@@ -21,7 +21,7 @@ router.post("/", verifyToken, authorizeRoles("admin", "manager"), createAthlete)
 
 
 // Athlete Profile Routes
-router.get('/:uid', verifyToken, getAthlete);
+router.get('/:uid/profile', verifyToken, getAthlete);
 
 
 // ✅ Update Athlete (Only Admins & Managers)
@@ -42,7 +42,6 @@ router.get('/:uid/injury', verifyToken, predictInjury);
 
 // ✅ Athlete Stats Route
 router.get('/:uid/stats', verifyToken, getAthleteStats);
-
 
 
 module.exports = router;

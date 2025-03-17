@@ -43,7 +43,7 @@ export const predictInjury = async (athleteId: string) => {
 
 // ✅ Fetch Athlete Profile
 export const fetchAthleteProfile = async (athleteId: string) => {
-  const response = await axiosInstance.get(`/athletes/${athleteId}`);
+  const response = await axiosInstance.get(`/athletes/${athleteId}/profile`);
   return response.data;
 };
 
